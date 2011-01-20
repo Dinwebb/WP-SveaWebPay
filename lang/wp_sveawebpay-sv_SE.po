@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: WP SveaWebPay\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-01-17 15:39+0100\n"
-"PO-Revision-Date: 2011-01-17 15:43+0100\n"
+"POT-Creation-Date: 2011-01-20 16:06+0100\n"
+"PO-Revision-Date: 2011-01-20 16:07+0100\n"
 "Last-Translator: Spathon <patrik@spathon.se>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -13,81 +13,69 @@ msgstr ""
 "X-Poedit-Basepath: .\n"
 "X-Poedit-Language: Swedish\n"
 "X-Poedit-Country: SWEDEN\n"
-"X-Poedit-SearchPath-0: C:\\Users\\Spathon\\Documents\\dinwebb\\mera mål\\svea\n"
-"X-Poedit-SearchPath-1: C:\\Users\\Spathon\\Documents\\dinwebb\\mera mål\\svea\n"
+"X-Poedit-SearchPath-0: C:\\Users\\Spathon\\Git\\WP-SveaWebPay\n"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:59
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:69
 msgid "Sorry your transaction did not go through successfully, please try again."
 msgstr "Tyvärr transaktionen misslyckades, var vänlig försök igen."
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:72
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:82
 msgid "Username"
 msgstr "Användarnamn"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:83
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:93
 msgid "Password"
 msgstr "Lösenord"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:94
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:104
 msgid "SveaWebPay url"
 msgstr "SveaWebPay url"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:105
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:115
 msgid "Payment method"
 msgstr "Betalnings metod"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:107
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:117
 msgid "All"
 msgstr "Alla"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:108
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:118
 msgid "Internetbank"
 msgstr "Internetbank"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:109
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:119
 msgid "Card"
 msgstr "Kort"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:110
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:120
 msgid "Invoice"
 msgstr "Faktura"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:111
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:121
 msgid "Partpayment"
 msgstr "Delbetalning"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:124
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:134
 msgid "Shipping tax: (0-100)"
 msgstr "Frakt moms: (0-100)"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:144
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:145
+msgid "Shipping name:"
+msgstr "Frakt namn:"
+
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:159
 msgid "Error message if transaction fails"
 msgstr "Felmeddelande om betalningen misslyckas"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:153
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:168
 msgid "Test mode"
 msgstr "Test mode"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:155
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:170
 msgid "Off"
 msgstr "Av"
 
-#: C:\Users\Spathon\Documents\dinwebb\mera
-#: mål\svea/wp-sveawebpay.php:156
+#: C:\Users\Spathon\Git\WP-SveaWebPay/wp-sveawebpay.php:171
 msgid "On"
 msgstr "På"
 

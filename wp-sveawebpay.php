@@ -6,6 +6,9 @@ Description: SveaWebPay payment gateway for wp e-commerce
 Author: Spathon @Dinwebb
 Version: 0.1
 Author URI: http://www.dinwebb.nu/
+
+Contact
+patrik.spathon@gmail.com
 */
 
 
@@ -19,15 +22,22 @@ $nzshpcrt_gateways[$num]['submit_function'] = "submit_sveawebpay";
 /*
  * @TODO
  * 
- * - Currency and language option? -> $wpsc_cart
- * - Shipping cost
+ * - Currency and language option? -> $wpsc_cart?
+ * - - Need a little work with languages and currency (currently only SEK)
  */
 
 
 # http://getshopped.org/resources/docs/get-involved/writing-a-new-payment-gateway/
 
 
-load_plugin_textdomain('wp_sveawebpay', dirname(plugin_basename( __FILE__ )) ."/lang" );
+
+/*
+ *
+ *   Load Language files
+ *
+ */
+$plugin_path = dirname(plugin_basename(__FILE__)) . '/lang';
+load_plugin_textdomain('wp_sveawebpay', false, $plugin_path );
 
 /*
 This function receives no parameters and returns a string with form elements ($output) within <tr> <td> </tr> <td>
@@ -130,7 +140,12 @@ function form_sveawebpay(){
 	$output .= '</td><td style="padding: 0 0 0 10px;">';
 		
 		// payment method
-		$output.= '&nbsp;';
+		$output.= '
+			<p>
+				<label for="sveawebpay_shipping_name">'. __('Shipping name:', 'wp_sveawebpay') .'</label>
+				<input name="sveawebpay_shipping_name" id="sveawebpay_shipping_name" type="text" value="'. get_option('sveawebpay_shipping_name') .'" />
+			</p>
+			';
 	
 	
 	//row
@@ -194,6 +209,9 @@ function submit_sveawebpay(){
 	
 	// Save the shipping tax
 	if($_POST['sveawebpay_shipping_tax'] != null) update_option('sveawebpay_shipping_tax', $_POST['sveawebpay_shipping_tax']);
+	
+	// Save the shipping Name
+	if($_POST['sveawebpay_shipping_name'] != null) update_option('sveawebpay_shipping_name', $_POST['sveawebpay_shipping_name']);
 	
 	// Save the Error message
 	if($_POST['sveawebpay_error'] != null) update_option('sveawebpay_error', $_POST['sveawebpay_error']);
@@ -269,6 +287,48 @@ function gateway_sveawebpay($seperator, $sessionid){
 	
 	);
 	
+	
+	
+	
+	
+	// should check for the right currency and if it works with sveawebpay
+	
+	/*
+		Supported Languages
+		For more information see e.g.: http://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+		Language Code		Language name
+		
+		SV 					Swedish
+		NB 					Norwegian Bokmål
+		FI 					Finnish
+		DA 					Danish
+		EN 					English
+		
+		
+		Supported Countries
+		For more information see e.g.: http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+		Country Code 		Country name
+		
+		SE 					Sweden
+		NO					Norway
+		FI 					Finland
+		DK 					Denmark
+		GB 					United Kingdom
+		
+		
+		Supported Currencies
+		For more information see e.g.: http://en.wikipedia.org/wiki/ISO_4217
+		Currency Code 		Currency name
+		
+		SEK 				Swedish krona/kronor
+		NOK 				Norwegian krone
+		EUR 				Euro (European Union countries)
+		DKK 				Danish krona
+	*/
+	
+	
+	
+	
 	// the selected payment method
 	$paymentMethod = get_option('sveawebpay_paymentmethod');
 	// add payment method if any is selected
@@ -290,14 +350,11 @@ function gateway_sveawebpay($seperator, $sessionid){
 		}else{
 			$tax = $wpsc_cart->tax_percentage;
 		}
-		#echo $tax.'<br />'; 
+		
 		$tax1 = ($tax/100.00);
-		#echo $tax.'<br />';
 		$tax2 = ($tax1 + 1);
-		#echo $tax2.'<br />';
 		
 		$price = ($Item->unit_price / $tax2);
-		#echo $price .'<br />';
 	
         $data['Row'.$current_row.'AmountExVAT']    = number_format($price,2, '.', ''); // product price (no tax)
         $data['Row'.$current_row.'VATPercentage']  = number_format($tax); // tax (int)
@@ -307,7 +364,6 @@ function gateway_sveawebpay($seperator, $sessionid){
 		$current_row++;
 		
 	}
-	#die();
 	
 	// add shipping cost
 	if(!empty($wpsc_cart->base_shipping) && $wpsc_cart->base_shipping > 0){
@@ -325,15 +381,19 @@ function gateway_sveawebpay($seperator, $sessionid){
 			$s_tax = 0;
 		}
 		
+		$name = get_option('sveawebpay_shipping_name');
+		if(empty($name)){
+			$name = urlencode($wpsc_cart->selected_shipping_option);
+		}
+		
+		
 		$data['Row'.$current_row.'AmountExVAT']    = number_format($price,2, '.', ''); // product price (no tax)
         $data['Row'.$current_row.'VATPercentage']  = $s_tax; // tax 0 for shipping?   ?   ?   ?
-        $data['Row'.$current_row.'Description']    = urlencode($wpsc_cart->selected_shipping_option); // Shipping
+        $data['Row'.$current_row.'Description']    = $name; // Shipping
         $data['Row'.$current_row.'Quantity']       = 1; // Quantity
 	}
 	
 	#echo '<pre>'; print_r($data); echo '</pre>'; die();
-	
-	
 
 	// put all keys and values together key=value
 	foreach($data as $key => $value) {
@@ -446,7 +506,16 @@ function sveawebpay_callback()
 		$_SESSION['WpscGatewayErrorMessage'] = get_option('sveawebpay_error');
 		
 		// redirect the user to the checkout page
+		// if the checkout page isn't set // had problems with this
 		$transact_url = get_option('checkout_url');
+		if(empty($transact_url)){
+			$transact_url = get_option('shopping_cart_url');
+		}
+		// if neither checkout or cart page is set send to start page
+		if(empty($transact_url)){
+			$transact_url = get_bloginfo('url');
+		}
+
 		header("Location: ".$transact_url);
 	}
 }
