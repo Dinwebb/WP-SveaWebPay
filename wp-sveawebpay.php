@@ -266,6 +266,7 @@ function gateway_sveawebpay($seperator, $sessionid){
 
 
 	
+	
 	// Password to sveawebpay account
 	$pwd = get_option('sveawebpay_password'); //Testinstallation
 	
@@ -422,7 +423,8 @@ function gateway_sveawebpay($seperator, $sessionid){
 	while (strstr($url, '&amp;&amp;')) $url = str_replace('&amp;&amp;', '&amp;', $url);
 	// header locates should not have the &amp; in the address it breaks things
 	while (strstr($url, '&amp;')) $url = str_replace('&amp;', '&', $url);
-
+	
+	
 	// send the user to SveaWebPay
 	header('Location: ' . $url);
 	die();
@@ -478,10 +480,18 @@ function sveawebpay_callback()
 						WHERE `sessionid` = ".$sessionid." LIMIT 1");
 			//transaction_results($sessionid,false,'',$transaction_id);
 			
+			
 
 			// redirect the user to the transaction page
 			$transact_url = get_option('transact_url');
-			header("Location: ".$transact_url."&sessionid=".$sessionid);
+			
+			// if permalinks
+			$separator = "?";
+			if (strpos($transact_url,"?")!=false) $separator = "&";
+			
+			header("Location: ".$transact_url. $separator ."sessionid=".$sessionid);
+		}else{
+			die(get_option('transact_url'));
 		}
 	}
 	
