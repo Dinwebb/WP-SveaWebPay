@@ -4,11 +4,13 @@ Plugin Name: SveaWebPay
 Plugin URI: http://www.dinwebb.nu
 Description: SveaWebPay payment gateway for wp e-commerce
 Author: Spathon @Dinwebb
-Version: 0.1
+Version: 0.5
 Author URI: http://www.dinwebb.nu/
 
 Contact
 patrik.spathon@gmail.com
+Twitter
+spathon
 */
 
 
@@ -252,23 +254,11 @@ function gateway_sveawebpay($seperator, $sessionid){
 	"SELECT * FROM `".WPSC_TABLE_PURCHASE_LOGS.
 	"` WHERE `sessionid`= ".$sessionid." LIMIT 1"
 	,ARRAY_A) ;
+	
+	
+	$orderId = $purchase_log['id'];
+	
 
-	
-	// Set the transaction id to a unique value for reference in the system.
-	$transaction_id = uniqid(md5(rand(1,666)), true);
-	
-	// update the transaction id in the database
-	$wpdb->query("UPDATE `".WPSC_TABLE_PURCHASE_LOGS."` SET 
-				`processed` = '1', 
-				`transactid` = '".$transaction_id."', 
-				`date` = '".time()."'
-				WHERE `sessionid` = ".$sessionid." LIMIT 1");
-
-
-	
-	
-	// Password to sveawebpay account
-	$pwd = get_option('sveawebpay_password'); //Testinstallation
 	
 	// SveaWebPay settings
 	$data = array(
@@ -278,7 +268,7 @@ function gateway_sveawebpay($seperator, $sessionid){
 		//'Row1VATPercentage' => 25, // Order row, VAT percentage of the amount. *1
 		//'Row1Description' => 'En+bok', // string(40) YES Order row, description of the merchandise. *1
 		//'Row1Quantity' => 2, // number(10) YES Order row, the number of units being purchased. *1
-		'OrderId' => $transaction_id.'-'.$sessionid, //$purchase_log['id'], // string(20) YES A string uniquely identifying an order within merchant’s web shop.
+		'OrderId' => $orderId, //$purchase_log['id'], // string(20) YES A string uniquely identifying an order within merchant’s web shop.
 		'ResponseURL'   =>  get_bloginfo('url'),
 		'CancelURL' => get_bloginfo('url'),
 		'Testmode'      =>  get_option('sveawebpay_testmode'),
@@ -402,6 +392,8 @@ function gateway_sveawebpay($seperator, $sessionid){
 	}
 
 
+	// Password to sveawebpay account
+	$pwd = get_option('sveawebpay_password'); //Testinstallation
 	
 	//https://partnerweb.sveaekonomi.se/webpayhosted2/InitiatePayment.aspx
 	// URL to sveaWebPay
@@ -424,6 +416,18 @@ function gateway_sveawebpay($seperator, $sessionid){
 	// header locates should not have the &amp; in the address it breaks things
 	while (strstr($url, '&amp;')) $url = str_replace('&amp;', '&', $url);
 	
+	
+	
+	
+	// Set the transaction id to a unique value for reference in the system.
+	#$transaction_id = uniqid(md5(rand(1,666)), true);
+	
+	// update the transaction id in the database
+	$wpdb->query("UPDATE `".WPSC_TABLE_PURCHASE_LOGS."` SET 
+				`processed` = '1', 
+				`transactid` = '".$md5 ."', 
+				`date` = '".time()."'
+				WHERE `sessionid` = ".$sessionid." LIMIT 1");
 	
 	// send the user to SveaWebPay
 	header('Location: ' . $url);
@@ -451,12 +455,7 @@ function sveawebpay_callback()
 {
 	global $wpdb;
 	
-	
-	// transactionID seperated by sessionID
-	$OrderId = explode('-', $_GET['OrderId']);
-	
-	$transaction_id = trim(stripslashes($OrderId[0]));
-	$sessionid = trim(stripslashes($OrderId[1]));
+
 	
 	
 	
@@ -464,34 +463,61 @@ function sveawebpay_callback()
 	// *** CONFIRMED PAYMENT ***
 	// *************************
 	if(isset($_GET['Success']) && $_GET['Success'] == 'true'){
-	
-		if (isset($transaction_id,$sessionid)) {
-
+		
+		
+		/*
+		 *   Start by checking if the md5 is correct
+		 */
+		
+		// user password
+		$pwd = get_option('sveawebpay_password'); //Testinstallation
+		
+		// Remove the md5 from the query
+		$raw_query = explode('&MD5=', $_SERVER['QUERY_STRING']);
+		// the query without md5
+		$clean_query = $raw_query[0];
+		// the md5 from sveawebpay
+		$md5_check = $raw_query[1];
+		// the new url with password
+		$md5_string  = get_bloginfo('url') .'?'. $clean_query. $pwd;
+		
+		
+		// check if the md5 is correct
+		if (md5($md5_string) != $md5_check) {
+			die("You can't do that!");
+		}else{
+		
+			$order = $_GET['OrderId'];
 			
 			// action used for success
-			do_action( 'sveawebpaySuccess', $sessionid );
+			do_action( 'sveawebpaySuccess', $order );
 			
 			
 			// set the payment as paid
 			$wpdb->query("UPDATE `".WPSC_TABLE_PURCHASE_LOGS."` SET 
 						`processed` = '2', 
-						`transactid` = '".$transaction_id."', 
 						`date` = '".time()."'
-						WHERE `sessionid` = ".$sessionid." LIMIT 1");
+						WHERE `id` = ".$order." LIMIT 1");
 			//transaction_results($sessionid,false,'',$transaction_id);
 			
+			// get the session id for redirect
+			$purchase_log = $wpdb->get_row(
+				"SELECT `sessionid` FROM `".WPSC_TABLE_PURCHASE_LOGS.
+				"` WHERE `id`= ".$order." LIMIT 1") ;
+				
+			$sessionid = $purchase_log->sessionid;
 			
-
 			// redirect the user to the transaction page
 			$transact_url = get_option('transact_url');
+			
+			// if empty // just in case
+			if(empty($transact_url)) $transact_url = get_bloginfo('url');
 			
 			// if permalinks
 			$separator = "?";
 			if (strpos($transact_url,"?")!=false) $separator = "&";
 			
 			header("Location: ".$transact_url. $separator ."sessionid=".$sessionid);
-		}else{
-			die(get_option('transact_url'));
 		}
 	}
 	
@@ -499,8 +525,12 @@ function sveawebpay_callback()
 	// *** CANCELLED PAYMENT ***
 	// *************************
 	if(isset($_GET['Success']) && $_GET['Success'] == 'false'){
+	
+		$order = $_GET['OrderId'];
+
+		//$log_id = $wpdb->get_var("SELECT `id` FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `transactid`='$MD5' LIMIT 1");
+		$log_id = $wpdb->get_var("SELECT `id` FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `id`='$order' LIMIT 1");
 		
-		$log_id = $wpdb->get_var("SELECT `id` FROM `".WPSC_TABLE_PURCHASE_LOGS."` WHERE `sessionid`='$sessionid' LIMIT 1");
 		$delete_log_form_sql = "SELECT * FROM `".WPSC_TABLE_CART_CONTENTS."` WHERE `purchaseid`='$log_id'";
 	
 		$cart_content = $wpdb->get_results($delete_log_form_sql,ARRAY_A);
